@@ -1,0 +1,230 @@
+{
+  "package_version": "1.0",
+  "metadata": {
+    "title": "一种基于行为状态与场景策略的地图数据预加载方法",
+    "subject": "地图瓦片及范围数据预加载",
+    "version": "example-1",
+    "delivery_mode": "FULL_DISCLOSURE",
+    "route": "DATA_CONTROL_LOOP",
+    "release_status": "受限底稿：待实验与代理师复核",
+    "docx_profile": "sample_exact",
+    "reference_docx": "sample/一种基于马尔可夫链的地图瓦片及范围数据预加载方法.docx",
+    "figure_output_mode": "spec_only"
+  },
+  "mode_contract": {"required_sections": ["delivery-scope", "summary", "technical-field", "background", "problem", "system-boundary", "solution", "parameters", "embodiments", "effects", "figure-description"]},
+  "evidence": [
+    {"id": "ev-f-problem", "type": "F", "source": "技术材料", "locator": "问题描述/1", "text": "用户在连续地图操作后才触发加载，可能出现空白或等待。"},
+    {"id": "ev-f-state", "type": "F", "source": "技术材料", "locator": "状态定义/1-6", "text": "输入事件被编码为放大、缩小和四个方向的平移状态。"},
+    {"id": "ev-i-loop", "type": "I", "source": "主链推导", "locator": "O-S-M-D-A-V-U", "text": "预测输出必须继续决定区域、优先级、执行和反馈动作。"},
+    {"id": "ev-f-example", "type": "F", "source": "脱敏实施例", "locator": "实施例/1", "text": "实施例使用连续两次左平移事件说明短历史路由。"},
+    {"id": "ev-q-effect", "type": "Q", "source": "待补实验", "locator": "效果/1", "text": "缺少基线、样本量、网络条件、原始日志和统计脚本。"},
+    {"id": "ev-q-boundary", "type": "Q", "source": "待确认清单", "locator": "边界/1-3", "text": "瓦片坐标、缓存容量、取消时序和更新公式需要由实现材料确认。"}
+  ],
+  "tables": [
+    {
+      "id": "state-table",
+      "title": "状态与意图字段表",
+      "evidence": ["ev-f-state", "ev-i-loop"],
+      "columns": ["字段", "示例取值", "下游用途", "证据"],
+      "rows": [
+        ["event_t", "pan_left", "形成状态", "[F]"],
+        ["state_t", "S3", "选择模型路径", "[F]"],
+        ["intent_t", "横向浏览", "确定数据优先级", "[I]"],
+        ["feedback_t", "hit/miss", "验证和更新", "[I/Q]"]
+      ],
+      "evidence_note": "[C] 表格字段由本输入包显式声明；具体采集接口仍待补。"
+    }
+  ],
+  "sections": [
+    {
+      "id": "delivery-scope",
+      "title": "交付说明与证据范围",
+      "level": 1,
+      "blocks": [
+        {"type": "paragraph", "text": "本文件是技术交底书底稿，不替代专利检索、实验或代理师法律审查；输入中的未知参数和效果保留为待确认项。", "evidence": ["ev-q-effect", "ev-q-boundary"], "evidence_primary": "Q"}
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "主题与摘要",
+      "level": 1,
+      "blocks": [
+        {"type": "paragraph", "text": "系统获取连续地图操作事件，将其编码为状态并按历史路由生成候选资源计划，再通过实际结果确认或取消任务。", "evidence": ["ev-i-loop", "ev-f-example"], "evidence_primary": "I"}
+      ]
+    },
+    {
+      "id": "technical-field",
+      "title": "技术领域",
+      "level": 1,
+      "blocks": [
+        {"type": "paragraph", "text": "本方案属于地理信息系统数据处理领域，具体涉及根据地图操作状态和场景策略确定预加载数据。", "evidence": ["ev-f-problem"]}
+      ]
+    },
+    {
+      "id": "system-boundary",
+      "title": "系统边界与主链",
+      "level": 1,
+      "blocks": [
+        {"type": "paragraph", "text": "输入源为客户端操作事件和环境约束，处理者为状态、策略和资源服务，输出为带版本的候选资源计划，反馈来自命中、失配、超时和容量结果。", "evidence": ["ev-i-loop", "ev-q-boundary"], "evidence_primary": "I"},
+        {"type": "figure_ref", "figure_id": "fig-system"}
+      ]
+    },
+    {
+      "id": "parameters",
+      "title": "模块与参数作用域",
+      "level": 1,
+      "blocks": [
+        {"type": "paragraph", "text": "状态编码、历史窗口、预加载范围、缓存容量和更新周期属于待确认参数；实施例数字不得无条件泛化。", "evidence": ["ev-q-boundary"]},
+        {"type": "table_ref", "table_id": "state-table"}
+      ]
+    },
+    {
+      "id": "background",
+      "title": "背景技术",
+      "level": 1,
+      "blocks": [
+        {"type": "paragraph", "text": "现有被动加载通常在用户完成操作后才请求数据，连续操作和弱网条件下可能放大等待。", "evidence": ["ev-f-problem"]},
+        {"type": "figure_ref", "figure_id": "fig-system"}
+      ]
+    },
+    {
+      "id": "problem",
+      "title": "技术问题",
+      "level": 1,
+      "blocks": [
+        {"type": "paragraph", "text": "需要在当前操作完成后、下一次视野请求前，根据可观测事件形成受约束的候选资源计划，并处理预测失配、缓存不足和数据缺失。", "evidence": ["ev-f-problem", "ev-q-boundary"], "evidence_primary": "F"},
+        {"type": "table_ref", "table_id": "state-table"}
+      ]
+    },
+    {
+      "id": "solution",
+      "title": "总体方案",
+      "level": 1,
+      "blocks": [
+        {"type": "paragraph", "text": "系统按观察 O、状态表示 S、模型或路由 M、决策 D、工程动作 A、验证 V、更新 U 的顺序运行；每一步的输出作为下一步的输入。", "evidence": ["ev-i-loop"]},
+        {"type": "bullet", "text": "采集事件并编码为可计算状态，保留来源、时点和版本。", "evidence": ["ev-f-state"]},
+        {"type": "bullet", "text": "根据可用历史长度选择无历史、短历史或场景化策略，并将预测结果映射为资源集合和优先级。", "evidence": ["ev-i-loop", "ev-q-boundary"], "evidence_primary": "I"},
+        {"type": "figure_ref", "figure_id": "fig-flow"}
+      ]
+    },
+    {
+      "id": "embodiments",
+      "title": "实施例",
+      "level": 1,
+      "blocks": [
+        {"type": "paragraph", "text": "在脱敏实施例中，系统连续接收两次左平移事件，使用短历史路径生成左侧候选范围；当实际事件与预测一致时保留已加载数据，否则取消未完成任务并重新计算。", "evidence": ["ev-f-example", "ev-i-loop"], "evidence_primary": "F"},
+        {"type": "figure_ref", "figure_id": "fig-sequence"}
+      ]
+    },
+    {
+      "id": "effects",
+      "title": "有益效果与验证边界",
+      "level": 1,
+      "blocks": [
+        {"type": "paragraph", "text": "该闭环用于把预测结果提前转换为区域、优先级和加载顺序；具体延迟、命中率、请求量和资源变化仍需在给定基线与环境下测量。", "evidence": ["ev-i-loop", "ev-q-effect"], "evidence_primary": "I"}
+      ]
+    },
+    {
+      "id": "figure-description",
+      "title": "附图说明",
+      "level": 1,
+      "blocks": [
+        {"type": "paragraph", "text": "图1示出系统边界与输入输出；图2示出主流程和失配回路；图3示出实施例中的事件、策略和执行时序。", "evidence": ["ev-i-loop"]},
+        {"type": "bullet", "text": "图1：系统边界与数据流。", "evidence": ["ev-i-loop"]},
+        {"type": "bullet", "text": "图2：状态路由、候选生成、验证和更新流程。", "evidence": ["ev-i-loop"]},
+        {"type": "bullet", "text": "图3：实施例的短历史预测与失配取消时序。", "evidence": ["ev-f-example"]}
+      ]
+    }
+  ],
+  "figures": [
+    {
+      "id": "fig-system",
+      "type": "system",
+      "title": "系统边界与数据流",
+      "caption": "输入事件经状态编码、策略决策和资源执行后，由实际结果反馈到更新模块。",
+      "labels": ["输入事件", "状态编码", "策略决策", "资源执行", "反馈更新"],
+      "used_by": ["background", "system-boundary", "figure-description"],
+      "evidence": ["ev-f-problem", "ev-i-loop"],
+      "source_image": "source-figures/fig-system-imagegen.png",
+      "generation_method": "imagegen",
+      "prompt": "无文字技术信息图底图：客户端事件、状态编码、策略决策、资源执行、反馈更新五个模块的闭环关系；留出可叠加中文标签的空白区域；不生成任何文字、字母或数字。",
+      "nodes": [
+        {"id": "input", "label": "输入事件", "role": "用户/设备"},
+        {"id": "state", "label": "状态编码", "role": "O → S"},
+        {"id": "decision", "label": "策略决策", "role": "M → D"},
+        {"id": "action", "label": "资源执行", "role": "A"},
+        {"id": "feedback", "label": "反馈更新", "role": "V → U"}
+      ],
+      "edges": [
+        {"from": "input", "to": "state", "label": "采集"},
+        {"from": "state", "to": "decision", "label": "路由"},
+        {"from": "decision", "to": "action", "label": "计划"},
+        {"from": "action", "to": "feedback", "label": "结果"},
+        {"from": "feedback", "to": "state", "label": "版本化反馈"}
+      ]
+    },
+    {
+      "id": "fig-flow",
+      "type": "flow",
+      "title": "状态路由与失配回路",
+      "caption": "系统先判定历史是否足够，再生成候选资源；命中时确认，失配时取消未完成任务并重算。",
+      "labels": ["状态", "历史路由", "预测", "候选资源", "命中", "失配/取消"],
+      "used_by": ["solution", "figure-description"],
+      "evidence": ["ev-i-loop", "ev-q-boundary"],
+      "source_image": "source-figures/fig-flow-imagegen.png",
+      "generation_method": "imagegen",
+      "prompt": "无文字方法流程图底图：当前状态、历史路由、预测下一步、候选资源、命中确认、失配取消六个节点和回环箭头；留出可叠加中文标签的空白区域；不生成任何文字。",
+      "nodes": [
+        {"id": "event", "label": "当前状态", "role": "event_t/state_t"},
+        {"id": "route", "label": "历史路由", "role": "条件分支"},
+        {"id": "predict", "label": "预测下一步", "role": "pred_event"},
+        {"id": "plan", "label": "候选资源", "role": "区域/优先级"},
+        {"id": "hit", "label": "命中确认", "role": "复用"},
+        {"id": "miss", "label": "失配取消", "role": "清理/重算"}
+      ],
+      "edges": [
+        {"from": "event", "to": "route", "label": "字段"},
+        {"from": "route", "to": "predict", "label": "路径"},
+        {"from": "predict", "to": "plan", "label": "映射"},
+        {"from": "plan", "to": "hit", "label": "一致"},
+        {"from": "plan", "to": "miss", "label": "不一致"},
+        {"from": "miss", "to": "event", "label": "重新采集"}
+      ]
+    },
+    {
+      "id": "fig-sequence",
+      "type": "sequence",
+      "title": "实施例的预测与执行时序",
+      "caption": "两次连续操作形成短历史输入；预测任务与实际操作以任务版本绑定，避免旧结果覆盖新状态。",
+      "labels": ["客户端", "状态服务", "策略服务", "缓存/资源服务", "任务版本"],
+      "used_by": ["embodiments", "figure-description"],
+      "evidence": ["ev-f-example", "ev-i-loop"],
+      "source_image": "source-figures/fig-sequence-imagegen.png",
+      "generation_method": "imagegen",
+      "prompt": "无文字时序图底图：客户端、状态服务、策略服务、缓存服务、任务版本五条泳道及消息箭头；留出可叠加中文标签的空白区域；不生成任何文字、数字或水印。",
+      "nodes": [
+        {"id": "client", "label": "客户端", "role": "事件 1/2"},
+        {"id": "state", "label": "状态服务", "role": "编码/历史"},
+        {"id": "strategy", "label": "策略服务", "role": "预测/优先级"},
+        {"id": "resource", "label": "缓存服务", "role": "执行/命中"},
+        {"id": "version", "label": "任务版本", "role": "确认/取消"}
+      ],
+      "edges": [
+        {"from": "client", "to": "state", "label": "事件"},
+        {"from": "state", "to": "strategy", "label": "短历史"},
+        {"from": "strategy", "to": "resource", "label": "预加载"},
+        {"from": "resource", "to": "version", "label": "结果"},
+        {"from": "version", "to": "client", "label": "命中/失配"}
+      ]
+    }
+  ],
+  "questions": [
+    {"id": "Q-001", "text": "瓦片坐标、范围几何、缓存键和跨经线边界如何定义？", "status": "open"},
+    {"id": "Q-002", "text": "取消、超时、缓存容量和模型更新的参数及验证数据是什么？", "status": "open"}
+  ],
+  "audit": {
+    "p0": [],
+    "p1": ["效果指标尚缺基线、样本和原始记录。", "空间几何与缓存并发契约待补。"],
+    "p2": []
+  }
+}

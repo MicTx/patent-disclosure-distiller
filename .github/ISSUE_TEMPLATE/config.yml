@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Questions & ideas
+    url: https://github.com/MicTx/patent-disclosure-distiller/discussions/categories/q-a
+    about: Usage questions and ideas belong in Discussions; issues are for reproducible problems in the published mirror.
+  - name: 🔐 Security & sensitive material
+    url: https://github.com/MicTx/patent-disclosure-distiller/security/policy
+    about: Never open a public issue for security reports or unpublished invention material — see SECURITY.md.
