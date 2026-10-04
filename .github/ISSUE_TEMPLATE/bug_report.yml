@@ -1,0 +1,55 @@
+name: 🐛 Bug report
+description: Something in the published skill or pipeline behaves incorrectly
+labels: [bug]
+body:
+  - type: checkboxes
+    id: search
+    attributes:
+      label: Search first
+      options:
+        - label: I have searched the existing issues, both open and closed
+          required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you ran, what you expected, and what you got instead
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: The exact validate/generate commands, and a minimal package.json excerpt if possible
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Mirror commit
+      description: Run this in your clone and paste the output
+      placeholder: git rev-parse HEAD
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: OS
+      multiple: true
+      options:
+        - Linux
+        - macOS
+        - Windows
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: python3 --version
+  - type: checkboxes
+    id: sensitive
+    attributes:
+      label: Unpublished invention material
+      options:
+        - label: This report contains NO unpublished invention material (described with placeholders instead where relevant)
+          required: true
